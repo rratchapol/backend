@@ -24,21 +24,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('users', [UserController::class, 'index']); // เส้นทาง GET สำหรับดึงข้อมูลผู้ใช้ทั้งหมด
+Route::post('users_page', [UserController::class, 'index']); // เส้นทาง GET สำหรับดึงข้อมูลผู้ใช้ทั้งหมด
 Route::post('users', [UserController::class, 'store']);
 Route::get('users/{id}', [UserController::class, 'show']);
 Route::put('users/{id}', [UserController::class, 'update']);
 Route::delete('users/{id}', [UserController::class, 'destroy']);
 
 
-Route::get('products', [ProductController::class, 'index']);
+Route::post('products_page', [ProductController::class, 'index']);
 Route::post('products', [ProductController::class, 'store']);
 Route::get('products/{id}', [ProductController::class, 'show']);
 Route::put('products/{id}', [ProductController::class, 'update']);
 Route::delete('products/{id}', [ProductController::class, 'destroy']);
 
 
-Route::get('categories', [CategoryController::class, 'index']);
+Route::post('categories_page', [CategoryController::class, 'index']);
 Route::post('categories', [CategoryController::class, 'store']);
 Route::get('categories/{id}', [CategoryController::class, 'show']);
 Route::put('categories/{id}', [CategoryController::class, 'update']);

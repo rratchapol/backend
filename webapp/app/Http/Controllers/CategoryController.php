@@ -16,11 +16,49 @@ class CategoryController extends Controller
      *     @OA\Response(response=400, description="Invalid request")
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::all();
-        return response()->json($categories);
+        $columns = $request->input('columns', []);
+        $length = $request->input('length', 10);
+        $order = $request->input('order', []);
+        $search = $request->input('search', []);
+        $start = $request->input('start', 0);
+        $page = ($start / $length) + 1;
+    
+        $col = ['id', 'category_name',  ];
+        $orderby = ['id', 'category_name',];
+    
+        $categories = Category::select($col);
+    
+        if (isset($order[0]['column']) && isset($orderby[$order[0]['column']])) {
+            $categories->orderBy($orderby[$order[0]['column']], $order[0]['dir']);
+        }
+    
+        if (!empty($search['value'])) {
+            $categories->where(function ($query) use ($search, $col) {
+                foreach ($col as $c) {
+                    $query->orWhere($c, 'like', '%' . $search['value'] . '%');
+                }
+            });
+        }
+    
+        $d = $categories->paginate($length, ['*'], 'page', $page);
+    
+        if ($d->isNotEmpty()) {
+            $d->transform(function ($item, $key) use ($page, $length) {
+                $item->No = ($page - 1) * $length + $key + 1;
+                return $item;
+            });
+        }
+    
+        return response()->json([
+            'status' => 'success',
+            'message' => 'เรียกดูข้อมูลสำเร็จ',
+            'data' => $d
+        ]);
     }
+    
+    
 
     /**
      * @OA\Post(

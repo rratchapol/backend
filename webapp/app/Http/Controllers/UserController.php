@@ -17,10 +17,46 @@ class UserController extends Controller
      *     @OA\Response(response=400, description="Invalid request")
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all(); 
-        return response()->json($users); 
+        $columns = $request->input('columns', []);
+        $length = $request->input('length', 10);
+        $order = $request->input('order', []);
+        $search = $request->input('search', []);
+        $start = $request->input('start', 0);
+        $page = ($start / $length) + 1;
+    
+        $col = ['id', 'name','email','mobile','address','faculty','department','class_year'  ];
+        $orderby = ['id', 'name','email','mobile','address','faculty','department','class_year'];
+    
+        $user = User::select($col);
+    
+        if (isset($order[0]['column']) && isset($orderby[$order[0]['column']])) {
+            $user->orderBy($orderby[$order[0]['column']], $order[0]['dir']);
+        }
+    
+        if (!empty($search['value'])) {
+            $user->where(function ($query) use ($search, $col) {
+                foreach ($col as $c) {
+                    $query->orWhere($c, 'like', '%' . $search['value'] . '%');
+                }
+            });
+        }
+    
+        $d = $user->paginate($length, ['*'], 'page', $page);
+    
+        if ($d->isNotEmpty()) {
+            $d->transform(function ($item, $key) use ($page, $length) {
+                $item->No = ($page - 1) * $length + $key + 1;
+                return $item;
+            });
+        }
+    
+        return response()->json([
+            'status' => 'success',
+            'message' => 'เรียกดูข้อมูลสำเร็จ',
+            'data' => $d
+        ]);
     }
 
 
